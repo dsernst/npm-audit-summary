@@ -4,7 +4,7 @@
   "description": "Print concise npm audit tables grouped by responsible dependency",
   "type": "module",
   "bin": {
-    "npm-audit-summary": "./cli.mjs"
+    "npm-audit-summary": "cli.mjs"
   },
   "files": [
     "cli.mjs"
