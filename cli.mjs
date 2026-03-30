@@ -31,8 +31,18 @@ const FIREBASE_TRANSITIVE = new Set([
 ])
 
 /**
- * @param {import('node:fs').PathLike} cwd
+ * @typedef {object} AuditVulnEntry
+ * @property {string} [name]
+ * @property {{ name?: string }} [fixAvailable]
+ * @property {string[]} [nodes]
+ * @property {string[]} [effects]
+ * @property {boolean} [isDirect]
+ */
+
+/**
+ * @param {AuditVulnEntry} v
  * @param {Set<string>} direct
+ * @returns {string}
  */
 function rootResponsible(v, direct) {
   if (v.fixAvailable && typeof v.fixAvailable === 'object' && v.fixAvailable.name) {
@@ -59,18 +69,19 @@ function rootResponsible(v, direct) {
     return 'firebase-admin'
   }
 
-  if (FIREBASE_TRANSITIVE.has(v.name)) {
+  if (v.name != null && FIREBASE_TRANSITIVE.has(v.name)) {
     return 'firebase-admin'
   }
 
   const effects = v.effects || []
-  const directHit = effects.find((e) => direct.has(e))
+  const directHit = effects.find((/** @type {string} */ e) => direct.has(e))
   if (directHit) return directHit
   if (effects.length) return effects[effects.length - 1]
-  if (v.isDirect) return v.name
+  if (v.isDirect) return v.name ?? '(unresolved)'
   return '(unresolved)'
 }
 
+/** @type {Record<string, number>} */
 const severityOrder = { critical: 0, high: 1, info: 4, low: 3, moderate: 2 }
 
 /**
@@ -107,6 +118,7 @@ Options:
   const vulns = audit.vulnerabilities || {}
 
   const rows = []
+  /** @type {Record<string, Record<string, number>>} */
   const byRoot = {}
 
   for (const [pkgName, data] of Object.entries(vulns)) {
@@ -166,7 +178,8 @@ Options:
 function printTable(headers, dataRows) {
   const widths = colWidths(headers, dataRows)
   const sep = widths.map((w) => '-'.repeat(w + 2))
-  const fmt = (cells) => '| ' + cells.map((c, i) => String(c).padEnd(widths[i])).join(' | ') + ' |'
+  const fmt = (/** @type {string[]} */ cells) =>
+    '| ' + cells.map((c, i) => String(c).padEnd(widths[i])).join(' | ') + ' |'
   console.log(fmt(headers))
   console.log('|' + sep.join('|') + '|')
   for (const row of dataRows) console.log(fmt(row))
@@ -175,6 +188,7 @@ function printTable(headers, dataRows) {
 /** @returns {Promise<string>} */
 function readStdinFull() {
   return new Promise((resolve, reject) => {
+    /** @type {Buffer[]} */
     const chunks = []
     process.stdin.on('data', (c) => chunks.push(c))
     process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
