@@ -20,15 +20,23 @@ function loadDirectDeps(cwd) {
   ])
 }
 
-/** Common transitives pulled in by firebase-admin; attribute to that root when unambiguous. */
-const FIREBASE_TRANSITIVE = new Set([
-  '@google-cloud/firestore',
-  '@google-cloud/storage',
-  'fast-xml-parser',
-  'google-gax',
-  'protobufjs',
-  'teeny-request',
-])
+/**
+ * Ordered package names along an install path (project root → leaf).
+ * Handles scoped packages (`@scope/name`) and Windows separators.
+ * @param {string} p
+ * @returns {string[]}
+ */
+function nodeModulesPackageChain(p) {
+  if (!p || typeof p !== 'string') return []
+  const normalized = p.replace(/\\/g, '/')
+  const segments = []
+  const re = /(?:^|\/)node_modules\/((?:@[^/]+\/[^/]+)|[^/]+)/g
+  let m
+  while ((m = re.exec(normalized)) !== null) {
+    segments.push(m[1])
+  }
+  return segments
+}
 
 /**
  * @typedef {object} AuditVulnEntry
@@ -50,32 +58,21 @@ function rootResponsible(v, direct) {
   }
 
   const nodes = v.nodes || []
-  const path0 = nodes[0] || ''
+  /** @type {string[][]} */
+  const chains = nodes.map((n) => nodeModulesPackageChain(n)).filter((c) => c.length > 0)
 
-  if (path0.includes('node_modules/@google-cloud/') || path0.includes('/@google-cloud/storage/')) {
-    return 'firebase-admin'
-  }
-  if (path0.includes('node_modules/cypress/') || path0.includes('node_modules/@cypress/')) {
-    return 'cypress'
-  }
-  if (path0.includes('node_modules/mailgun-js/')) {
-    return 'mailgun-js'
-  }
-  if (path0.includes('node_modules/patch-package/')) {
-    return 'patch-package'
-  }
-
-  if (v.name === '@tootallnate/once' && !path0.includes('mailgun')) {
-    return 'firebase-admin'
-  }
-
-  if (v.name != null && FIREBASE_TRANSITIVE.has(v.name)) {
-    return 'firebase-admin'
+  for (const chain of chains) {
+    const directInPath = chain.find((name) => direct.has(name))
+    if (directInPath) return directInPath
   }
 
   const effects = v.effects || []
   const directHit = effects.find((/** @type {string} */ e) => direct.has(e))
   if (directHit) return directHit
+
+  // Top-level dependency in this resolution path (first segment after each node_modules/)
+  if (chains.length) return chains[0][0]
+
   if (effects.length) return effects[effects.length - 1]
   if (v.isDirect) return v.name ?? '(unresolved)'
   return '(unresolved)'
