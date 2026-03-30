@@ -12,6 +12,9 @@
   "engines": {
     "node": ">=18"
   },
+  "scripts": {
+    "test": "echo \"No tests yet\""
+  },
   "keywords": [
     "npm",
     "audit",
