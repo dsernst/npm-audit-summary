@@ -10,14 +10,6 @@ From a project that has a `package.json`:
 npx npm-audit-summary
 ```
 
-Or pipe audit JSON:
-
-```bash
-npm audit --json 2>/dev/null | npx npm-audit-summary --stdin
-# equivalent:
-npm audit --json 2>/dev/null | npx npm-audit-summary -
-```
-
 ## Responsible column
 
 The tool reads **`package.json` in the current working directory** to map audit entries to a “responsible” direct dependency (including heuristics for common stacks such as `firebase-admin` and Google Cloud transitives).
