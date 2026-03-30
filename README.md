@@ -1,4 +1,4 @@
-# npm-audit-report
+# npm-audit-summary
 
 Print concise **npm audit** tables: one flat list (severity → vulnerable package → responsible root dependency) and one summary grouped by that root.
 
@@ -7,15 +7,15 @@ Print concise **npm audit** tables: one flat list (severity → vulnerable packa
 From a project that has a `package.json`:
 
 ```bash
-npx npm-audit-report
+npx npm-audit-summary
 ```
 
 Or pipe audit JSON:
 
 ```bash
-npm audit --json 2>/dev/null | npx npm-audit-report --stdin
+npm audit --json 2>/dev/null | npx npm-audit-summary --stdin
 # equivalent:
-npm audit --json 2>/dev/null | npx npm-audit-report -
+npm audit --json 2>/dev/null | npx npm-audit-summary -
 ```
 
 ## Responsible column

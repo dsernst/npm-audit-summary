@@ -98,9 +98,9 @@ async function main() {
   const argv = process.argv.slice(2)
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(`Usage:
-  npm-audit-report              # runs npm audit --json in the current directory
-  npm audit --json | npm-audit-report --stdin
-  npm audit --json | npm-audit-report -
+  npm-audit-summary              # runs npm audit --json in the current directory
+  npm audit --json | npm-audit-summary --stdin
+  npm audit --json | npm-audit-summary -
 
 Requires package.json in the current working directory for the "responsible" column.
 
