@@ -1,0 +1,26 @@
+{
+  "name": "npm-audit-report",
+  "version": "1.0.0",
+  "description": "Print concise npm audit tables grouped by responsible dependency",
+  "type": "module",
+  "bin": {
+    "npm-audit-report": "./cli.mjs"
+  },
+  "files": [
+    "cli.mjs"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "npm",
+    "audit",
+    "security",
+    "cli",
+    "table"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0"
+  }
+}
