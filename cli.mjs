@@ -257,8 +257,15 @@ Options:
   )
   console.log('')
 
-  const roots = Object.keys(byRoot).sort((a, b) => a.localeCompare(b))
   const allKeys = ['critical', 'high', 'moderate', 'low', 'info']
+  const roots = Object.keys(byRoot).sort((a, b) => {
+    for (const k of allKeys) {
+      const da = byRoot[a][k] || 0
+      const db = byRoot[b][k] || 0
+      if (db !== da) return db - da
+    }
+    return a.localeCompare(b)
+  })
   const sevKeys = allKeys.filter((k) => roots.some((name) => byRoot[name][k]))
   const groupedRows = roots.map((name) => {
     const c = byRoot[name]
